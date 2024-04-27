@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { SEARCH_RESULT_API, YOUTUBE_API } from "../utils/constants";
 import ShimmerUI from "./ShimmerUI";
@@ -11,30 +11,35 @@ const VideoLibrary = () => {
   const [isLoading, setIsLoading] = useState(false);
   const filter = searchParams.get("filter");
 
-  // Fetch videos from the Youtube API
-  const getVideos = async () => {
-    const data = await fetch(
-      !filter ? YOUTUBE_API : SEARCH_RESULT_API + filter
-    );
-    const json = await data.json();
-    const onlyVideos = json.items.filter((video) => {
-      if (!filter) {
-        return video.kind === "youtube#video";
-      } else {
-        return video.id.kind === "youtube#video";
+  const getVideos = useCallback(async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetch(
+          !filter ? YOUTUBE_API : SEARCH_RESULT_API + filter
+        );
+        const json = await data.json();
+        const onlyVideos = json.items.filter((video) => {
+          if (!filter) {
+            return video.kind === "youtube#video";
+          } else {
+            return video.id.kind === "youtube#video";
+          }
+        });
+        setIsLoading(false);
+        setVideos(onlyVideos);
+      } catch (e) {
+        setIsLoading(false);
+        setVideos(null);
       }
-    });
-    setIsLoading(false);
-    setVideos(onlyVideos);
-  };
+    };
+
+    fetchData();
+  }, [filter]);
 
   useEffect(() => {
-    setIsLoading(true);
-    getVideos().catch((e) => {
-      setIsLoading(false);
-      setVideos(null);
-    });
-  }, [searchParams, filter]);
+    getVideos();
+  }, [getVideos]);
 
   if (isLoading) {
     return <ShimmerUI />;

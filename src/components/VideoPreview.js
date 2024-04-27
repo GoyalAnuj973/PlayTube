@@ -8,14 +8,15 @@ const VideoPreview = ({ videoId }) => {
   const [video, setVideo] = useState([]);
 
   useEffect(() => {
-    getVideo();
-  }, []);
+    const getVideo = async () => {
+      const data = await fetch(VIDEO_API + videoId);
+      const json = await data.json();
+      setVideo(json.items[0]);
+    };
 
-  const getVideo = async () => {
-    const data = await fetch(VIDEO_API + videoId);
-    const json = await data.json();
-    setVideo(json.items[0]);
-  };
+    getVideo();
+  }, [videoId]);
+
   if (video.length === 0) return <VideoPreviewShimmer />;
   return (
     <div className="flex flex-col md:w-3/5 md:mr-3 mb-4">

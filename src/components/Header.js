@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { AiOutlineSearch, AiOutlineMenu } from "react-icons/ai";
@@ -15,6 +15,16 @@ const Header = () => {
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const searchCacheResults = useSelector((store) => store.search);
 
+  const getSearchSuggestions = useCallback(async () => {
+    fetch(YOUTUBE_SEARCH_API + searchQuery)
+      .then((res) => res.json())
+      .then((res) => {
+        setSearchSuggestions(res[1]);
+        if (searchQuery) dispatch(cacheResults({ [searchQuery]: res[1] }));
+      })
+      .catch((error) => console.log(error));
+  }, [searchQuery, dispatch]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchCacheResults[searchQuery]) {
@@ -26,20 +36,10 @@ const Header = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [searchQuery]);
+  }, [searchQuery, searchCacheResults, getSearchSuggestions]);
 
   const toggleMenuHandler = () => {
     dispatch(toggleMenu());
-  };
-
-  const getSearchSuggestions = async () => {
-    fetch(YOUTUBE_SEARCH_API + searchQuery)
-      .then((res) => res.json())
-      .then((res) => {
-        setSearchSuggestions(res[1]);
-        if (searchQuery) dispatch(cacheResults({ [searchQuery]: res[1] }));
-      })
-      .catch((error) => console.log(error));
   };
 
   return (

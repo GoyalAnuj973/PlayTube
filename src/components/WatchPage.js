@@ -9,10 +9,11 @@ const WatchPage = () => {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get("v");
+
   useEffect(() => {
     dispatch(closeMenu());
     dispatch(hideFilterList());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="md:flex md:flex-wrap md:justify-center md:w-full mt-4">

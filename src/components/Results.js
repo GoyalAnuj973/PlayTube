@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { SEARCH_RESULT_API } from "../utils/constants";
 import ResultVideoCard from "./ResultVideoCard";
@@ -10,11 +10,7 @@ const Results = () => {
   const search_query = searchParams?.get("search_query");
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    getVideos();
-  }, [search_query]);
-
-  const getVideos = async () => {
+  const getVideos = useCallback(async () => {
     const data = await fetch(SEARCH_RESULT_API + search_query);
     const json = await data.json();
     console.log(json.items);
@@ -23,15 +19,21 @@ const Results = () => {
     });
     setIsLoading(false);
     setVideos(onlyVideos);
-  };
+  }, [search_query]);
 
   useEffect(() => {
-    setIsLoading(true);
-    getVideos().catch((e) => {
-      setIsLoading(false);
-      setVideos(null);
-    });
-  }, [search_query]);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        await getVideos();
+      } catch (e) {
+        setIsLoading(false);
+        setVideos(null);
+      }
+    };
+
+    fetchData();
+  }, [search_query, getVideos]);
 
   if (isLoading) {
     return <ResultShimmer />;
@@ -41,7 +43,7 @@ const Results = () => {
     return (
       <div className="md:flex flex-col md:flex-wrap md:justify-center mx-auto w-fit">
         <div className="mt-48 text-lg text-red-400 bg-gray-100 p-2 rounded-xl shadow-inner">
-          Oops! looks like we have exceeded youtube API quota
+          Oops! looks like we have exceeded the YouTube API quota
         </div>
       </div>
     );
@@ -49,13 +51,11 @@ const Results = () => {
 
   return (
     <div className="md:flex flex-col md:flex-wrap md:justify-center mx-auto w-fit">
-      {videos.map((video) => {
-        return (
-          <Link key={video.id.videoId} to={"/watch?v=" + video.id.videoId}>
-            <ResultVideoCard key={video.id.videoId} info={video} />
-          </Link>
-        );
-      })}
+      {videos.map((video) => (
+        <Link key={video.id.videoId} to={"/watch?v=" + video.id.videoId}>
+          <ResultVideoCard key={video.id.videoId} info={video} />
+        </Link>
+      ))}
     </div>
   );
 };

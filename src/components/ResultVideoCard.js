@@ -1,9 +1,9 @@
 import React from "react";
 import { RxDotFilled } from "react-icons/rx";
 import moment from "moment/moment";
-import { kFormatter } from "../utils/constants";
+// import { kFormatter } from "../utils/constants";
 const ResultVideoCard = ({ info }) => {
-  const { snippet, statistics } = info;
+  const { snippet } = info; //, statistics
   const { channelTitle, title, thumbnails, publishedAt, description } = snippet;
   return (
     <div className="space-y-2 mb-2 md:h-52 md:m-2 md:my-3 flex-col md:flex-row flex cursor-pointer p-1 rounded-lg">

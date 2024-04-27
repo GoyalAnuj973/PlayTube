@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { COMMENTS_API, kFormatter } from "../utils/constants";
 import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
 import moment from "moment";
@@ -6,15 +6,15 @@ import moment from "moment";
 const Comments = ({ videoId }) => {
   const [comments, setComments] = useState([]);
 
-  const getComments = async () => {
+  const fetchComments = useCallback(async () => {
     const data = await fetch(COMMENTS_API + videoId);
     const json = await data.json();
     setComments(json.items);
-  };
+  }, [videoId]);
 
   useEffect(() => {
-    getComments();
-  }, [videoId]);
+    fetchComments();
+  }, [fetchComments]);
 
   return (
     <div>
